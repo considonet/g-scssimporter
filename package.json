@@ -1,0 +1,15 @@
+{
+  "name": "@considonet/g-scssimporter",
+  "version": "1.0.0",
+  "description": "GBuild node-sass importer",
+  "main": "./lib/api.js",
+  "keywords": [
+    "gstrap"
+  ],
+  "author": "ConsidoNet Solutions Paweł Gabryelewicz",
+  "license": "MIT",
+  "dependencies": {
+    "@considonet/g-logger": "^1.0.0",
+    "get-installed-path": "^4.0.8"
+  }
+}
