@@ -1,12 +1,12 @@
 {
   "name": "@considonet/g-scssimporter",
-  "version": "1.1.0",
-  "description": "GBuild node-sass importer",
+  "version": "1.1.1",
+  "description": "G-Build node-sass/dart-sass importer",
   "main": "./lib/api.js",
   "keywords": [
     "gstrap"
   ],
-  "author": "ConsidoNet Solutions Paweł Gabryelewicz",
+  "author": "Paweł Gabryelewicz",
   "license": "MIT",
   "repository": "github:considonet/g-scssimporter",
   "dependencies": {
