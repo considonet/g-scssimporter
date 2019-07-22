@@ -213,7 +213,7 @@ class ScssImporter {
     } else { // Other file resolved, returning the static contents
 
       this.logger.log(`Resolved to external file: ${outPath}`, 3);
-      done({ contents: imports.fs.readFileSync(outPath, "utf8") });
+      done({ file: outPath, contents: imports.fs.readFileSync(outPath, "utf8") });
 
     }
 
