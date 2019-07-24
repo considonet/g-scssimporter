@@ -2,7 +2,9 @@ const imports = {
   "path": require("path"),
   "fs": require("fs"),
   "getInstalledPathSync": require("get-installed-path").getInstalledPathSync,
-  "Logger": require("@considonet/g-logger")
+  "Logger": require("@considonet/g-logger"),
+  "mkdirp": require("mkdirp"),
+  "rimraf": require("rimraf")
 };
 
 class ScssImporter {
@@ -14,6 +16,11 @@ class ScssImporter {
     this.scssPrefixes = ["", "_"];
     this.scssExtensions = [".scss", ".css", ""];
     this.scssIndexFileNames = ["index"];
+
+    // Temp dir is required to put pre-compiled JSON files. Thanks to them, dart-sass doesn't crash with source maps
+    this.tmpDir = imports.path.join(process.cwd(), "./node_modules/.tmp/scss-importer");
+    imports.rimraf.sync(this.tmpDir);
+    imports.mkdirp.sync(this.tmpDir);
 
   }
 
@@ -104,6 +111,45 @@ class ScssImporter {
     return outPath;
 
   };
+
+  transformJsonToScss(json) {
+
+    return Object.keys(json)
+      .filter(key => this.isValidScssKey(key))
+      .filter(key => json[key] !== '#')
+      .map(key => `$${key}: ${this.parseScssValue(json[key])};`)
+      .join('\n');
+
+  }
+
+  isValidScssKey(key) {
+    return /^[^$@:].*/.test(key)
+  }
+
+  parseScssValue(value) {
+    if (Array.isArray(value)) {
+      return this.parseScssList(value);
+    } else if (typeof value === "object") {
+      return this.parseScssMap(value);
+    } else if (value === "") {
+      return '""'; // Return explicitly an empty string (Sass would otherwise throw an error as the variable is set to nothing)
+    } else {
+      return value;
+    }
+  }
+
+  parseScssList(list) {
+    return `(${list
+      .map(value => this.parseScssValue(value))
+      .join(',')})`;
+  }
+
+  parseScssMap(map) {
+    return `(${Object.keys(map)
+      .filter(key => this.isValidScssKey(key))
+      .map(key => `${key}: ${this.parseScssValue(map[key])}`)
+      .join(',')})`;
+  }
 
   importerCallback(fileName, prev, done) {
 
@@ -209,6 +255,19 @@ class ScssImporter {
 
       this.logger.log(`Resolved to SCSS file: ${outPath}`, 3);
       done({ file: outPath });
+
+    } else if(outPath.match(/\.js(on)?$/)) { // JS/JSON file resolved
+
+      this.logger.log(`Resolved to JS file: ${outPath}`, 3);
+      delete require.cache[require.resolve(outPath)];
+
+      const vars = require(outPath);
+      const contents = this.transformJsonToScss(vars);
+
+      // We save pre-compiled JSONs for dart-sass source maps; otherwise it crashes
+      const fakePath = imports.path.join(this.tmpDir, "./", outPath.replace(/[^A-Za-z0-9]/g, "_")+".scss");
+      imports.fs.writeFileSync(fakePath, contents);
+      done({ file: fakePath, contents });
 
     } else { // Other file resolved, returning the static contents
 

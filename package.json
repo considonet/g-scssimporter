@@ -1,6 +1,6 @@
 {
   "name": "@considonet/g-scssimporter",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "G-Build node-sass/dart-sass importer",
   "main": "./lib/api.js",
   "keywords": [
@@ -11,6 +11,8 @@
   "repository": "github:considonet/g-scssimporter",
   "dependencies": {
     "@considonet/g-logger": "^1.1.1",
-    "get-installed-path": "^4.0.8"
+    "get-installed-path": "^4.0.8",
+    "mkdirp": "^0.5.1",
+    "rimraf": "^2.6.3"
   }
 }
